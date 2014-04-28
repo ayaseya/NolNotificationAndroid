@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -12,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -41,31 +43,55 @@ public class NolNotificationActivity extends Activity {
 	Context context;
 
 	String regid;
+	private AsyncTask<Void, Void, Void> mRegisterTask;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_nol_notification);
 
-		
-		Log.v(TAG, "onCreate()");
-		
-		mDisplay = (TextView) findViewById(R.id.display);
+		Log.v(TAG, "++++++++++++++++++++++++++++++++++++++++++++++++++");
 
+		mDisplay = (TextView) findViewById(R.id.display);
 		context = getApplicationContext();
+
+		NotificationManager mNotificationManager = (NotificationManager) this
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.cancel(GcmIntentService.NOTIFICATION_ID);
 
 		// Check device for Play Services APK. If check succeeds, proceed with
 		// GCM registration.
 		if (checkPlayServices()) {
 			gcm = GoogleCloudMessaging.getInstance(this);
+			Log.v(TAG, "onCreate()_getInstance()");
 			regid = getRegistrationId(context);
-
+			Log.v(TAG, "onCreate()_getRegistrationId()_regid = " + regid);
 			if (regid.isEmpty()) {
 				registerInBackground();
+				Log.v(TAG, "registerInBackground()");
 			}
 		} else {
 			Log.i(TAG, "No valid Google Play Services APK found.");
 		}
+
+		findViewById(R.id.registration).setOnClickListener(
+				new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Log.v(TAG, "登録");
+
+					}
+				});
+
+		findViewById(R.id.unregister).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Log.v(TAG, "解除");
+
+			}
+		});
 
 	}
 
@@ -92,10 +118,10 @@ public class NolNotificationActivity extends Activity {
 				Log.i(TAG, "This device is not supported.");
 				finish();
 			}
-//			Log.v(TAG, "checkPlayServices()=false");
+			// Log.v(TAG, "checkPlayServices()=false");
 			return false;
 		}
-//		Log.v(TAG, "checkPlayServices()=true");
+		// Log.v(TAG, "checkPlayServices()=true");
 		return true;
 	}
 
@@ -145,7 +171,7 @@ public class NolNotificationActivity extends Activity {
 			Log.i(TAG, "App version changed.");
 			return "";
 		}
-		Log.v(TAG, "registrationId=" + registrationId);
+		// Log.v(TAG, "getRegistrationId()_registrationId=" + registrationId);
 		return registrationId;
 	}
 
@@ -186,7 +212,7 @@ public class NolNotificationActivity extends Activity {
 					// Require the user to click a button again, or perform
 					// exponential back-off.
 				}
-				Log.v(TAG, "doInBackground_msg="+msg);
+				Log.v(TAG, "doInBackground_msg=" + msg);
 				return msg;
 			}
 
@@ -271,6 +297,25 @@ public class NolNotificationActivity extends Activity {
 	private void sendRegistrationIdToBackend() {
 		// Your implementation here.
 		Log.v(TAG, "sendRegistrationIdToBackend()");
+
+		final Context context = this;
+		// 非同期処理で別スレッドに登録処理を任せます。（GUIスレッドではHTTP通信はできないため）
+		mRegisterTask = new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				ServerUtilities.register(context, regid);
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+
+				mRegisterTask = null;
+			}
+
+		};
+		mRegisterTask.execute(null, null, null);
 	}
 
 }

@@ -29,17 +29,33 @@
 
             <Button
                 android:id="@+id/send"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="onClick"
                 android:text="@string/send" />
 
             <Button
                 android:id="@+id/clear"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="onClick"
                 android:text="@string/clear" />
+
+            <Button
+                android:id="@+id/registration"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="登録" />
+
+            <Button
+                android:id="@+id/unregister"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="解除" />
 
         </LinearLayout>
 
