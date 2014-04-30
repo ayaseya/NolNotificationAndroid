@@ -16,6 +16,7 @@
 
 package com.ayaseya.nolnotification;
 
+import static com.ayaseya.nolnotification.CommonUtilities.*;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -43,7 +44,6 @@ public class GcmIntentService extends IntentService {
     public GcmIntentService() {
         super("GcmIntentService");
     }
-    public static final String TAG = "GCM Demo";
 
     @Override
     protected void onHandleIntent(Intent intent) {

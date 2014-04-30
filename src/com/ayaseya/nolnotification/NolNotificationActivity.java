@@ -1,11 +1,16 @@
 package com.ayaseya.nolnotification;
 
+import static com.ayaseya.nolnotification.CommonUtilities.*;
+
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -30,7 +35,7 @@ public class NolNotificationActivity extends Activity {
 	 * Substitute you own sender ID here. This is the project number you got
 	 * from the API Console, as described in "Getting Started."
 	 */
-	String SENDER_ID = "977505068557";
+	// String SENDER_ID = "977505068557";
 
 	/**
 	 * Tag used on log messages.
@@ -55,6 +60,14 @@ public class NolNotificationActivity extends Activity {
 		mDisplay = (TextView) findViewById(R.id.display);
 		context = getApplicationContext();
 
+		// registerReceiverの登録を行う
+		// 第一引数 BroadcastReceiver,第二引数 IntentFilter
+		// mHandleMessageReceiverは内部クラスとして最下部で定義しています。
+		registerReceiver(mHandleMessageReceiver, 
+				new IntentFilter(DISPLAY_MESSAGE_ACTION));
+
+		// NotificationがクリックされActivityが呼び出された時に
+		// Notificationを非表示にする処理
 		NotificationManager mNotificationManager = (NotificationManager) this
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.cancel(GcmIntentService.NOTIFICATION_ID);
@@ -63,12 +76,14 @@ public class NolNotificationActivity extends Activity {
 		// GCM registration.
 		if (checkPlayServices()) {
 			gcm = GoogleCloudMessaging.getInstance(this);
-			Log.v(TAG, "onCreate()_getInstance()");
+
 			regid = getRegistrationId(context);
-			Log.v(TAG, "onCreate()_getRegistrationId()_regid = " + regid);
+
+			// レジストレーションIDがShared Preferencesに保存されているか確認します。
 			if (regid.isEmpty()) {
-				registerInBackground();
-				Log.v(TAG, "registerInBackground()");
+				registerInBackground();// レジストレーションIDの登録とサーバーへの送信処理を実行します。
+			} else {
+				mDisplay.append("レジストレーションIDは登録済みです。" + "\n");
 			}
 		} else {
 			Log.i(TAG, "No valid Google Play Services APK found.");
@@ -79,8 +94,8 @@ public class NolNotificationActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						Log.v(TAG, "登録");
-
+						// Log.v(TAG, "登録");
+						sendRegistrationIdToBackend();
 					}
 				});
 
@@ -88,8 +103,8 @@ public class NolNotificationActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				Log.v(TAG, "解除");
-
+				// Log.v(TAG, "解除");
+				releaseRegistrationIdToBackend();
 			}
 		});
 
@@ -118,10 +133,8 @@ public class NolNotificationActivity extends Activity {
 				Log.i(TAG, "This device is not supported.");
 				finish();
 			}
-			// Log.v(TAG, "checkPlayServices()=false");
 			return false;
 		}
-		// Log.v(TAG, "checkPlayServices()=true");
 		return true;
 	}
 
@@ -133,6 +146,8 @@ public class NolNotificationActivity extends Activity {
 	 *            application's context.
 	 * @param regId
 	 *            registration ID
+	 * 
+	 *            Shared PreferencesにレジストレーションIDとアプリのversion情報を保存します。
 	 */
 	private void storeRegistrationId(Context context, String regId) {
 		final SharedPreferences prefs = getGcmPreferences(context);
@@ -142,7 +157,7 @@ public class NolNotificationActivity extends Activity {
 		editor.putString(PROPERTY_REG_ID, regId);
 		editor.putInt(PROPERTY_APP_VERSION, appVersion);
 		editor.commit();
-		Log.v(TAG, "storeRegistrationId()");
+		// Log.v(TAG, "storeRegistrationId()");
 	}
 
 	/**
@@ -153,6 +168,9 @@ public class NolNotificationActivity extends Activity {
 	 * 
 	 * @return registration ID, or empty string if there is no existing
 	 *         registration ID.
+	 * 
+	 *         Shared Preferencesに保存したレジストレーションIDを呼び出します。
+	 * 
 	 */
 	private String getRegistrationId(Context context) {
 		final SharedPreferences prefs = getGcmPreferences(context);
@@ -171,7 +189,6 @@ public class NolNotificationActivity extends Activity {
 			Log.i(TAG, "App version changed.");
 			return "";
 		}
-		// Log.v(TAG, "getRegistrationId()_registrationId=" + registrationId);
 		return registrationId;
 	}
 
@@ -180,6 +197,9 @@ public class NolNotificationActivity extends Activity {
 	 * <p>
 	 * Stores the registration ID and the app versionCode in the application's
 	 * shared preferences.
+	 * 
+	 * GCMサーバーにアプリを登録してレジストレーションIDを取得します。 また、レジストレーションIDを管理する自前のサーバーに
+	 * レジストレーションIDを送信して登録します。
 	 */
 	private void registerInBackground() {
 		new AsyncTask<Void, Void, String>() {
@@ -191,12 +211,12 @@ public class NolNotificationActivity extends Activity {
 						gcm = GoogleCloudMessaging.getInstance(context);
 					}
 					regid = gcm.register(SENDER_ID);
-					msg = "Device registered, registration ID=" + regid;
+					msg = "Device registered, registration ID = " + regid;
 
 					// You should send the registration ID to your server over
 					// HTTP, so it
 					// can use GCM/HTTP or CCS to send messages to your app.
-					sendRegistrationIdToBackend();
+					sendRegistrationIdToBackend();// 自前のサーバーにレジストレーションIDを送信し登録します。
 
 					// For this demo: we don't need to send it because the
 					// device will send
@@ -205,14 +225,14 @@ public class NolNotificationActivity extends Activity {
 					// 'from' address in the message.
 
 					// Persist the regID - no need to register again.
-					storeRegistrationId(context, regid);
+					storeRegistrationId(context, regid);// レジストレーションIDをShared
+														// Preferencesに保存します。
 				} catch (IOException ex) {
 					msg = "Error :" + ex.getMessage();
 					// If there is an error, don't just keep trying to register.
 					// Require the user to click a button again, or perform
 					// exponential back-off.
 				}
-				Log.v(TAG, "doInBackground_msg=" + msg);
 				return msg;
 			}
 
@@ -243,7 +263,6 @@ public class NolNotificationActivity extends Activity {
 					} catch (IOException ex) {
 						msg = "Error :" + ex.getMessage();
 					}
-					Log.v(TAG, "onClick()_msg=" + msg);
 					return msg;
 				}
 
@@ -260,10 +279,13 @@ public class NolNotificationActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		unregisterReceiver(mHandleMessageReceiver);// レシーバーの解除
 	}
 
 	/**
 	 * @return Application's version code from the {@code PackageManager}.
+	 * 
+	 *         version情報を取得します。
 	 */
 	private static int getAppVersion(Context context) {
 		try {
@@ -278,6 +300,8 @@ public class NolNotificationActivity extends Activity {
 
 	/**
 	 * @return Application's {@code SharedPreferences}.
+	 * 
+	 *         Shared Preferencesのインスタンスを取得します。
 	 */
 	private SharedPreferences getGcmPreferences(Context context) {
 		// This sample app persists the registration ID in shared preferences,
@@ -293,10 +317,12 @@ public class NolNotificationActivity extends Activity {
 	 * GCM/HTTP or CCS to send messages to your app. Not needed for this demo
 	 * since the device sends upstream messages to a server that echoes back the
 	 * message using the 'from' address in the message.
+	 * 
+	 * レジストレーションIDを自前のサーバーに送信して登録します。
 	 */
 	private void sendRegistrationIdToBackend() {
 		// Your implementation here.
-		Log.v(TAG, "sendRegistrationIdToBackend()");
+		// Log.v(TAG, "sendRegistrationIdToBackend()");
 
 		final Context context = this;
 		// 非同期処理で別スレッドに登録処理を任せます。（GUIスレッドではHTTP通信はできないため）
@@ -310,12 +336,56 @@ public class NolNotificationActivity extends Activity {
 
 			@Override
 			protected void onPostExecute(Void result) {
-
+				mDisplay.append("レジストレーションIDを登録しました。" + "\n");
 				mRegisterTask = null;
 			}
 
 		};
 		mRegisterTask.execute(null, null, null);
 	}
+
+	/**
+	 * Sends the registration ID to your server over HTTP, so it can use
+	 * GCM/HTTP or CCS to send messages to your app. Not needed for this demo
+	 * since the device sends upstream messages to a server that echoes back the
+	 * message using the 'from' address in the message.
+	 * 
+	 * レジストレーションIDの登録を解除します。
+	 */
+	private void releaseRegistrationIdToBackend() {
+		// Your implementation here.
+		// Log.v(TAG, "sendRegistrationIdToBackend()");
+
+		final Context context = this;
+		// 非同期処理で別スレッドに登録処理を任せます。（GUIスレッドではHTTP通信はできないため）
+		mRegisterTask = new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				ServerUtilities.unregister(context, regid);
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				mDisplay.append("レジストレーションIDの登録を解除しました。" + "\n");
+				mRegisterTask = null;
+			}
+
+		};
+		mRegisterTask.execute(null, null, null);
+	}
+
+	// BroadcastReceiver、onReceive（）に受信時の挙動を記載しています。
+	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// Intentに添付された文字列情報を取り出しTextViewに追記します。
+			String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+			mDisplay.append(newMessage + "\n");
+		}
+	};
+
+
 
 }

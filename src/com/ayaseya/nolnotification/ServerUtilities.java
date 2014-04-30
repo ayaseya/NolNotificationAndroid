@@ -187,7 +187,7 @@ public final class ServerUtilities {
 			// コンテンツ長が事前にわかっている場合に、内部バッファ処理を行わずに
 			// HTTP要求本体のストリーミングを有効にするために使用します。
 			conn.setFixedLengthStreamingMode(bytes.length);
-															
+
 			conn.setRequestMethod("POST");// URLの要求のメソッドをPOSTに設定します。
 			conn.setRequestProperty("Content-Type",
 					"application/x-www-form-urlencoded;charset=UTF-8");// 一般要求プロパティーを設定します。
@@ -197,7 +197,9 @@ public final class ServerUtilities {
 			out.close();
 			// handle the response
 			int status = conn.getResponseCode();// HTTPの応答メッセージから状態コードを取得します。
-			if(status == 200) {Log.i(TAG, ".success");}
+			if (status == 200) {
+				// Log.i(TAG, ".success");
+			}
 			if (status != 200) {
 				// HTTP/1.0 200 OK
 				// HTTP/1.0 401 Unauthorized

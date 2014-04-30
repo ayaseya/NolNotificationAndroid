@@ -15,6 +15,7 @@
  */
 package com.ayaseya.nolnotification;
 
+import static com.ayaseya.nolnotification.CommonUtilities.*;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,7 +34,7 @@ import android.util.Log;
  */
 
 public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
-    public static final String TAG = "GCM Demo";
+
     
     @Override
     public void onReceive(Context context, Intent intent) {

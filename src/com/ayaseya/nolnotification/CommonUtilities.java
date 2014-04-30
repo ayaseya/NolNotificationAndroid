@@ -51,7 +51,7 @@ public final class CommonUtilities {
     /**
      * Tag used on log messages.
      */
-    static final String TAG = "GCM";
+    static final String TAG = "GCM Demo";
 
     /**
      * Intent used to display a message in the screen.
