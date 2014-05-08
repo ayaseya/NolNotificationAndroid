@@ -7,5 +7,9 @@
     <style name="AppBaseTheme" parent="android:Theme.Holo.Light">
         <!-- API 11 theme customizations can go here. -->
     </style>
+       <drawable name="translucent_background">#992e3128</drawable>
+    <style name="Theme.SemiTransparent" parent="android:style/Theme.Translucent">
+        <item name="android:windowBackground">@drawable/translucent_background</item>
+    </style>
 
 </resources>

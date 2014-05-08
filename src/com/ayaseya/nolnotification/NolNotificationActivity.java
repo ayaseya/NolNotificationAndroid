@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -105,6 +107,15 @@ public class NolNotificationActivity extends Activity {
 			public void onClick(View v) {
 				// Log.v(TAG, "解除");
 				releaseRegistrationIdToBackend();
+			}
+		});
+		
+		findViewById(R.id.notification).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// Log.v(TAG, "Notification");
+				sendNotification("テスト表示です");
 			}
 		});
 
@@ -386,6 +397,23 @@ public class NolNotificationActivity extends Activity {
 		}
 	};
 
+    private void sendNotification(String msg) {
+    	NotificationManager mNotificationManager = (NotificationManager)
+                this.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, DialogActivity.class), 0);
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.ic_stat_gcm)
+        .setContentTitle("GCM Notification")
+        .setStyle(new NotificationCompat.BigTextStyle()
+        .bigText(msg))
+        .setContentText(msg);
+
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(1, mBuilder.build());
+    }
 
 }
