@@ -1,16 +1,28 @@
 package com.ayaseya.nolnotification;
 
+import static com.ayaseya.nolnotification.CommonUtilities.*;
+
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 
 public class DialogActivity extends Activity {
-	private String[] update = { "aaa", "bbb", "ccc", "ddd", "eee", "fff", "ggg", "hhh", "iii" };
+
+	private ArrayList<String> title;
+	private ArrayList<String> url;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -24,10 +36,50 @@ public class DialogActivity extends Activity {
 		//ダイアログの縦横幅を最大にします。
 		getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
+		Intent intent = getIntent();
+		if (intent != null) {
+			Bundle extras = intent.getExtras();
+			Intent update = extras.getParcelable("UPDATE");
+
+			if (update != null) {
+
+				extras = update.getExtras();
+
+				title = new ArrayList<String>();
+				url = new ArrayList<String>();
+
+				int index = Integer.parseInt((String) extras.get("INDEX"));
+
+				Log.v(TAG, "index=" + index);
+
+				if (index != 0) {
+					for (int i = 0; i < index; i++) {
+						title.add((String) extras.get("TITLE" + (i + 1)));
+						url.add((String) extras.get("URL" + (i + 1)));
+
+						Log.v(TAG, title.get(i));
+						Log.v(TAG, url.get(i));
+					}
+				}
+			}
+		}
+
 		ListView updateListView = (ListView) findViewById(R.id.updateListView);
 
 		ArrayAdapter<String> adapter =
-				new ArrayAdapter<String>(this, R.layout.simple_list_item_layout, update);
+				new ArrayAdapter<String>(this, R.layout.simple_list_item_layout, title);
+
+		updateListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Log.v(TAG, "position=" + position);
+
+				Uri uri = Uri.parse(url.get(position));
+				Intent browser = new Intent(Intent.ACTION_VIEW, uri);
+				startActivity(browser);
+			}
+		});
 
 		updateListView.setAdapter(adapter);
 

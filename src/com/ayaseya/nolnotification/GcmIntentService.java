@@ -37,18 +37,19 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
  * wake lock.
  */
 public class GcmIntentService extends IntentService {
-    public static final int NOTIFICATION_ID = 1;
-    private NotificationManager mNotificationManager;
-    NotificationCompat.Builder builder;
+	public static final int NOTIFICATION_ID = 1;
+	private NotificationManager mNotificationManager;
+	NotificationCompat.Builder builder;
 
-    public GcmIntentService() {
-        super("GcmIntentService");
-    }
+	public GcmIntentService() {
+		super("GcmIntentService");
+	}
 
-    @Override
+	@Override
     protected void onHandleIntent(Intent intent) {
-    	
+    	    	
         Bundle extras = intent.getExtras();
+        
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         // The getMessageType() intent parameter must be the intent you received
         // in your BroadcastReceiver.
@@ -81,7 +82,7 @@ public class GcmIntentService extends IntentService {
                 // Post notification of received message.
                 
                 
-                sendNotification("公式サイトからのお知らせが"+extras.get("INDEX")+"件あります。");
+                sendNotification("公式サイトからのお知らせが"+extras.get("INDEX")+"件あります。", intent);
 //                sendNotification("Received: " + extras.toString());
                 Log.i(TAG, "Received: " + extras.toString());
             }
@@ -90,28 +91,50 @@ public class GcmIntentService extends IntentService {
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    // Put the message into a notification and post it.
-    // This is just one simple example of what you might choose to do with
-    // a GCM message.
-    private void sendNotification(String msg) {
-     	
-    	
-        mNotificationManager = (NotificationManager)
-                this.getSystemService(Context.NOTIFICATION_SERVICE);
+	// Put the message into a notification and post it.
+	// This is just one simple example of what you might choose to do with
+	// a GCM message.
+	private void sendNotification(String msg) {
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, NolNotificationActivity.class), 0);
+		mNotificationManager = (NotificationManager)
+				this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-        .setSmallIcon(R.drawable.ic_stat_gcm)
-        .setContentTitle("GCM Notification")
-        .setStyle(new NotificationCompat.BigTextStyle()
-        .bigText(msg))
-        .setContentText(msg);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+				new Intent(this, NolNotificationActivity.class), 0);
 
-        mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
-    }
-    
+		NotificationCompat.Builder mBuilder =
+				new NotificationCompat.Builder(this)
+						.setSmallIcon(R.drawable.ic_stat_gcm)
+						.setContentTitle(getResources().getString(R.string.app_name))
+						.setStyle(new NotificationCompat.BigTextStyle()
+								.bigText(msg))
+						.setContentText(msg);
+
+		mBuilder.setContentIntent(contentIntent);
+		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+	}
+
+	private void sendNotification(String msg, Intent i) {
+
+		mNotificationManager = (NotificationManager)
+				this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		Intent intent = new Intent(this, DialogActivity.class);
+		intent.putExtra("UPDATE", i);
+
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+				intent, 0);
+
+		NotificationCompat.Builder mBuilder =
+				new NotificationCompat.Builder(this)
+						.setSmallIcon(R.drawable.ic_stat_gcm)
+						.setContentTitle(getResources().getString(R.string.app_name))
+						.setStyle(new NotificationCompat.BigTextStyle()
+								.bigText(msg))
+						.setContentText(msg);
+
+		mBuilder.setContentIntent(contentIntent);
+		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+	}
+
 }
