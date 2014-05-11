@@ -21,8 +21,8 @@ import android.widget.ListView;
 
 public class DialogActivity extends Activity {
 
-	private ArrayList<String> title;
-	private ArrayList<String> url;
+	private ArrayList<String> title = new ArrayList<String>();
+	private ArrayList<String> url = new ArrayList<String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,19 +34,20 @@ public class DialogActivity extends Activity {
 		setContentView(R.layout.dialog_nol_notification);
 
 		//ダイアログの縦横幅を最大にします。
-		getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
 		Intent intent = getIntent();
 		if (intent != null) {
 			Bundle extras = intent.getExtras();
-			Intent update = extras.getParcelable("UPDATE");
+
+			Intent update = null;
+			if (extras != null) {
+				update = extras.getParcelable("UPDATE");
+			}
 
 			if (update != null) {
 
 				extras = update.getExtras();
-
-				title = new ArrayList<String>();
-				url = new ArrayList<String>();
 
 				int index = Integer.parseInt((String) extras.get("INDEX"));
 
@@ -64,6 +65,8 @@ public class DialogActivity extends Activity {
 			}
 		}
 
+		title.add("1.xxxxx");
+		url.add("1.xxxxx");
 		ListView updateListView = (ListView) findViewById(R.id.updateListView);
 
 		ArrayAdapter<String> adapter =
