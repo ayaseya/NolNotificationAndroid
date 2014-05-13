@@ -42,6 +42,7 @@ public final class ServerUtilities {
 	private static final int MAX_ATTEMPTS = 5;// リトライ回数の上限を設定します。
 	private static final int BACKOFF_MILLI_SECONDS = 2000;// リトライ時間の下限を設定します。
 	private static final Random random = new Random();
+	
 
 	/**
 	 * Register this account/device pair within the server.
@@ -49,7 +50,7 @@ public final class ServerUtilities {
 	 */
 	static void register(final Context context, final String regId) {
 		Log.i(TAG, "registering device (regId = " + regId + ")");
-
+		
 		// サーバーの登録URLを設定します。
 		String serverUrl = SERVER_URL + "/register";
 
@@ -77,9 +78,11 @@ public final class ServerUtilities {
 				// サーバーに端末を登録したことをGCMに登録します。
 				// GCMRegistrar.setRegisteredOnServer(context, true);
 
-				String message = context.getString(R.string.server_registered);
-				CommonUtilities.displayMessage(context, message);
-
+//				String message = context.getString(R.string.server_registered);
+//				CommonUtilities.displayMessage(context, message);
+				CommonUtilities.displayMessage(context, "\nレジストレーションIDの登録が正常に完了しました。");
+				// Persist the regID - no need to register again.
+	
 				return;
 
 			} catch (IOException e) {
@@ -90,6 +93,8 @@ public final class ServerUtilities {
 				// (like HTTP error code 503).
 				Log.e(TAG, "Failed to register on attempt " + i + ":" + e);
 				if (i == MAX_ATTEMPTS) {
+				
+		
 					break;
 				}
 				try {
@@ -108,6 +113,7 @@ public final class ServerUtilities {
 		String message = context.getString(R.string.server_register_error,
 				MAX_ATTEMPTS);
 		CommonUtilities.displayMessage(context, message);
+
 	}
 
 	/**
@@ -137,6 +143,7 @@ public final class ServerUtilities {
 		}
 	}
 
+	
 	/**
 	 * Issue a POST request to the server.
 	 * 

@@ -96,6 +96,7 @@
             android:launchMode="singleInstance"
             android:theme="@style/Theme.SemiTransparent" >
         </activity>
+        <activity android:name="SettingActivity"></activity>
     </application>
 
 </manifest>

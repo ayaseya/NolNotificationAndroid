@@ -72,14 +72,13 @@ public class GcmIntentService extends IntentService {
 
 	public GcmIntentService() {
 		super("GcmIntentService");
-		Log.v(TAG, "GcmIntentService()");
 	}
+	
 
 	@Override
-	protected void onHandleIntent(final Intent intent) {
-
-
-
+	public void onCreate() {
+		super.onCreate();
+		
 		ringerModeStateChangeReceiver = new BroadcastReceiver() {
 
 			@Override
@@ -113,6 +112,25 @@ public class GcmIntentService extends IntentService {
 				}
 			}
 		};
+		
+		// Broadcast Receiverを登録します。
+		registerReceiver(plugStateChangeReceiver, plugIntentFilter);
+		registerReceiver(ringerModeStateChangeReceiver, ringerModeIntentFilter);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		// Broadcast Receiver登録解除
+		unregisterReceiver(plugStateChangeReceiver);
+		unregisterReceiver(ringerModeStateChangeReceiver);
+	}
+
+
+	@Override
+	protected void onHandleIntent(final Intent intent) {
+
+
 
 		extras = intent.getExtras();
 
@@ -121,7 +139,7 @@ public class GcmIntentService extends IntentService {
 		// in your BroadcastReceiver.
 		String messageType = gcm.getMessageType(intent);
 
-		displayMessage(this, extras.toString());
+//		displayMessage(this, extras.toString());
 
 		if (!extras.isEmpty()) { // has effect of unparcelling Bundle
 			/*
@@ -149,40 +167,41 @@ public class GcmIntentService extends IntentService {
 				Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
 				// Post notification of received message.
 
+				// ブロードキャストの登録をActivityやService上で行うと、
+				// onDestroy()で解除メソッドを呼び出さないといけない。
+				// 音声のロードを待ってからSoundPoolの開放と
+				// ブロードキャストの解除を行いたいので非同期処理上で完結させます。
+
 				new AsyncTask<Void, Void, Void>() {
 
 					@Override
 					protected Void doInBackground(Void... params) {
 						Log.v(TAG, "doInBackground()");
-						// Broadcast Receiverを登録します。
-						registerReceiver(plugStateChangeReceiver, plugIntentFilter);
-						registerReceiver(ringerModeStateChangeReceiver, ringerModeIntentFilter);
 
-						
+
 						soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-
-
 						soundPool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
 
 							@Override
 							public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
 								if (status == 0) {
-									
+
 									sendNotification("公式サイトからのお知らせが" + extras.get("INDEX") + "件あります。", intent);
-									
+
 									if (ringerMode && !isPlugged) {
 										soundPool.play(se, 0.5F, 0.5F, 0, 0, 1.0F);
-										Log.v(TAG, "通常モード中");
+										Log.v(TAG, "通常モード");
+									} else if (!ringerMode) {
+										Log.v(TAG, "マナーモード");
 									} else if (isPlugged) {
 										soundPool.play(se, 0.1F, 0.1F, 0, 0, 1.0F);
 										Log.v(TAG, "イヤホンジャック接続中");
 									}
-									Log.v("Test", "sendNotification="+status);
-	
+
 								}
 							}
 						});
-						
+
 						se = soundPool.load(GcmIntentService.this, R.raw.notification_sound, 1);
 
 						return null;
@@ -190,17 +209,22 @@ public class GcmIntentService extends IntentService {
 
 					@Override
 					protected void onPostExecute(Void result) {
-						
-						
-						try {
-							Thread.sleep(60000);
-						} catch (InterruptedException e) {
-						}
-						// Broadcast Receiver登録解除
-						unregisterReceiver(plugStateChangeReceiver);
-						unregisterReceiver(ringerModeStateChangeReceiver);
-						Log.v(TAG, "onPostExecute()");
-						soundPool.release();
+
+						new Thread(new Runnable() {
+
+							@Override
+							public void run() {
+
+								try {
+									Thread.sleep(30000);
+								} catch (InterruptedException e) {
+								}
+								Log.v(TAG, "onPostExecute()");
+
+								soundPool.release();
+
+							}
+						}).start();
 					}
 
 				}.execute(null, null, null);

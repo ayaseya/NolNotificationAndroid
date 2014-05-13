@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,10 +16,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -42,7 +41,7 @@ public class NolNotificationActivity extends Activity {
 	/**
 	 * Tag used on log messages.
 	 */
-	static final String TAG = "GCM Demo";
+
 
 	TextView mDisplay;
 	GoogleCloudMessaging gcm;
@@ -84,6 +83,7 @@ public class NolNotificationActivity extends Activity {
 			// レジストレーションIDがShared Preferencesに保存されているか確認します。
 			if (regid.isEmpty()) {
 				registerInBackground();// レジストレーションIDの登録とサーバーへの送信処理を実行します。
+				mDisplay.append("レジストレーションIDの初回登録を実行します..." + "\n");
 			} else {
 				mDisplay.append("レジストレーションIDは登録済みです。" + "\n");
 			}
@@ -91,33 +91,33 @@ public class NolNotificationActivity extends Activity {
 			Log.i(TAG, "No valid Google Play Services APK found.");
 		}
 
-		findViewById(R.id.registration).setOnClickListener(
-				new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						// Log.v(TAG, "登録");
-						sendRegistrationIdToBackend();
-					}
-				});
-
-		findViewById(R.id.unregister).setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// Log.v(TAG, "解除");
-				releaseRegistrationIdToBackend();
-			}
-		});
+//		findViewById(R.id.registration).setOnClickListener(
+//				new OnClickListener() {
+//
+//					@Override
+//					public void onClick(View v) {
+//						// Log.v(TAG, "登録");
+//						sendRegistrationIdToBackend();
+//					}
+//				});
+//
+//		findViewById(R.id.unregister).setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				// Log.v(TAG, "解除");
+//				releaseRegistrationIdToBackend();
+//			}
+//		});
 		
-		findViewById(R.id.notification).setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// Log.v(TAG, "Notification");
-				sendNotification("テスト表示です");
-			}
-		});
+//		findViewById(R.id.notification).setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				 Log.v(TAG, "Notification");
+//				sendNotification("テスト表示です");
+//			}
+//		});
 
 	}
 
@@ -222,8 +222,8 @@ public class NolNotificationActivity extends Activity {
 						gcm = GoogleCloudMessaging.getInstance(context);
 					}
 					regid = gcm.register(SENDER_ID);
-					msg = "Device registered, registration ID = " + regid;
-
+//					msg = "Device registered, registration ID = " + regid;
+		
 					// You should send the registration ID to your server over
 					// HTTP, so it
 					// can use GCM/HTTP or CCS to send messages to your app.
@@ -235,9 +235,7 @@ public class NolNotificationActivity extends Activity {
 					// using the
 					// 'from' address in the message.
 
-					// Persist the regID - no need to register again.
-					storeRegistrationId(context, regid);// レジストレーションIDをShared
-														// Preferencesに保存します。
+		
 				} catch (IOException ex) {
 					msg = "Error :" + ex.getMessage();
 					// If there is an error, don't just keep trying to register.
@@ -258,33 +256,33 @@ public class NolNotificationActivity extends Activity {
 	// Send an upstream message.
 	public void onClick(final View view) {
 
-		if (view == findViewById(R.id.send)) {
-			new AsyncTask<Void, Void, String>() {
-				@Override
-				protected String doInBackground(Void... params) {
-					String msg = "";
-					try {
-						Bundle data = new Bundle();
-						data.putString("my_message", "Hello World");
-						data.putString("my_action",
-								"com.google.android.gcm.demo.app.ECHO_NOW");
-						String id = Integer.toString(msgId.incrementAndGet());
-						gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
-						msg = "Sent message";
-					} catch (IOException ex) {
-						msg = "Error :" + ex.getMessage();
-					}
-					return msg;
-				}
-
-				@Override
-				protected void onPostExecute(String msg) {
-					mDisplay.append(msg + "\n");
-				}
-			}.execute(null, null, null);
-		} else if (view == findViewById(R.id.clear)) {
-			mDisplay.setText("");
-		}
+//		if (view == findViewById(R.id.send)) {
+//			new AsyncTask<Void, Void, String>() {
+//				@Override
+//				protected String doInBackground(Void... params) {
+//					String msg = "";
+//					try {
+//						Bundle data = new Bundle();
+//						data.putString("my_message", "Hello World");
+//						data.putString("my_action",
+//								"com.google.android.gcm.demo.app.ECHO_NOW");
+//						String id = Integer.toString(msgId.incrementAndGet());
+//						gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
+//						msg = "Sent message";
+//					} catch (IOException ex) {
+//						msg = "Error :" + ex.getMessage();
+//					}
+//					return msg;
+//				}
+//
+//				@Override
+//				protected void onPostExecute(String msg) {
+//					mDisplay.append(msg + "\n");
+//				}
+//			}.execute(null, null, null);
+//		} else if (view == findViewById(R.id.clear)) {
+//			mDisplay.setText("");
+//		}
 	}
 
 	@Override
@@ -347,7 +345,8 @@ public class NolNotificationActivity extends Activity {
 
 			@Override
 			protected void onPostExecute(Void result) {
-				mDisplay.append("レジストレーションIDを登録しました。" + "\n");
+
+				
 				mRegisterTask = null;
 			}
 
@@ -393,27 +392,60 @@ public class NolNotificationActivity extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			// Intentに添付された文字列情報を取り出しTextViewに追記します。
 			String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+			if(newMessage.equals("\nレジストレーションIDの登録が正常に完了しました。")){
+				// Persist the regID - no need to register again.
+				storeRegistrationId(context, regid);// レジストレーションIDをSharedPreferencesに保存します。
+			}
 			mDisplay.append(newMessage + "\n");
 		}
 	};
 
-    private void sendNotification(String msg) {
-    	NotificationManager mNotificationManager = (NotificationManager)
-                this.getSystemService(Context.NOTIFICATION_SERVICE);
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.nol_notification, menu);
+		menu.findItem(R.id.action_settings).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		return true;
+		
+		
+	}
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, DialogActivity.class), 0);
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	
+		
+		int id = item.getItemId();
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-        .setSmallIcon(R.drawable.ic_launcher)
-        .setContentTitle("GCM Notification")
-        .setStyle(new NotificationCompat.BigTextStyle()
-        .bigText(msg))
-        .setContentText(msg);
+		if (id == R.id.action_settings) {
+			Intent intent = new Intent(this, SettingActivity.class);
+			startActivity(intent);
+			
+		}
+		return super.onOptionsItemSelected(item);
+		
+		
+	}
+	
+	
+	
+	
 
-        mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(1, mBuilder.build());
-    }
+//    private void sendNotification(String msg) {
+//    	NotificationManager mNotificationManager = (NotificationManager)
+//                this.getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+//                new Intent(this, DialogActivity.class), 0);
+//
+//        NotificationCompat.Builder mBuilder =
+//                new NotificationCompat.Builder(this)
+//        .setSmallIcon(R.drawable.ic_launcher)
+//        .setContentTitle("GCM Notification")
+//        .setStyle(new NotificationCompat.BigTextStyle()
+//        .bigText(msg))
+//        .setContentText(msg);
+//
+//        mBuilder.setContentIntent(contentIntent);
+//        mNotificationManager.notify(1, mBuilder.build());
+//    }
 
 }

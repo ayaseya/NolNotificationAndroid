@@ -39,7 +39,7 @@ public final class CommonUtilities {
      * GAEのユニークなURL、末尾の/は削除しておく必要がある
      */
 //    static final String SERVER_URL = "http://1-dot-ayaseya-dev-jp.appspot.com";
-    static final String SERVER_URL = "http://192.168.21.12:8888";
+    static final String SERVER_URL = "http://192.168.21.14:8888";
     /**
      * Google API project id registered to use GCM.
      * Google Developers Console
@@ -57,7 +57,7 @@ public final class CommonUtilities {
      * Intent used to display a message in the screen.
      */
     static final String DISPLAY_MESSAGE_ACTION =
-            "com.google.android.gcm.demo.app.DISPLAY_MESSAGE";
+            "com.ayaseya.nolnotification.DISPLAY_MESSAGE";
 
     /**
      * Intent's extra that contains the message to be displayed.
