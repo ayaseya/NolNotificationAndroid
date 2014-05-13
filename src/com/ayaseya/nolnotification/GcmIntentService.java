@@ -189,12 +189,12 @@ public class GcmIntentService extends IntentService {
 									sendNotification("公式サイトからのお知らせが" + extras.get("INDEX") + "件あります。", intent);
 
 									if (ringerMode && !isPlugged) {
-										soundPool.play(se, 0.5F, 0.5F, 0, 0, 1.0F);
+										soundPool.play(se, 1.0F, 1.0F, 0, 0, 1.0F);
 										Log.v(TAG, "通常モード");
 									} else if (!ringerMode) {
 										Log.v(TAG, "マナーモード");
 									} else if (isPlugged) {
-										soundPool.play(se, 0.1F, 0.1F, 0, 0, 1.0F);
+										soundPool.play(se, 0.5F, 0.5F, 0, 0, 1.0F);
 										Log.v(TAG, "イヤホンジャック接続中");
 									}
 
