@@ -395,6 +395,8 @@ public class NolNotificationActivity extends Activity {
 			if(newMessage.equals("\nレジストレーションIDの登録が正常に完了しました。")){
 				// Persist the regID - no need to register again.
 				storeRegistrationId(context, regid);// レジストレーションIDをSharedPreferencesに保存します。
+				Intent defaultIntent = new Intent(NolNotificationActivity.this, SettingActivity.class);
+				startActivity(defaultIntent);
 			}
 			mDisplay.append(newMessage + "\n");
 		}

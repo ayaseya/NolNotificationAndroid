@@ -17,6 +17,12 @@
 package com.ayaseya.nolnotification;
 
 import static com.ayaseya.nolnotification.CommonUtilities.*;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Set;
+
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,12 +30,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.media.SoundPool.OnLoadCompleteListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -70,15 +79,58 @@ public class GcmIntentService extends IntentService {
 
 	private Bundle extras;
 
+	private SharedPreferences sharedPreferences;
+
+	private boolean checkbox_sound;
+
+	private boolean checkbox_vibration;
+
+	private Vibrator vibrator;
+
+	private boolean silentMode;
+
+	private boolean vibrateMode;
+
+	private boolean notificationPermission;
+
 	public GcmIntentService() {
 		super("GcmIntentService");
 	}
-	
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
+
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+		checkbox_sound = sharedPreferences.getBoolean("checkbox_sound_key", true);
+		checkbox_vibration = sharedPreferences.getBoolean("checkbox_vibration_key", false);
+
+		Set<String> multiValues = sharedPreferences.getStringSet("list_preference", null);
+		ArrayList<String> timeZone = new ArrayList<String>();
+
+		if (multiValues != null) {
+
+			timeZone.addAll(multiValues);
+			Collections.sort(timeZone);
+			for (int i = 0; i < timeZone.size(); i++) {
+				//				Log.v(TAG, "TimeZone=" + timeZone.get(i));
+			}
+
+			Calendar calendar = Calendar.getInstance();
+			int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+			if (timeZone.indexOf(String.valueOf(hour)) == -1) {
+				notificationPermission = false;
+				//				Log.v(TAG, "通知が許可された時間帯ではありません。");
+			} else {
+				notificationPermission = true;
+				//				Log.v(TAG, "通知が許可された時間帯です。");
+			}
+		}
+
+		vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+
 		ringerModeStateChangeReceiver = new BroadcastReceiver() {
 
 			@Override
@@ -88,11 +140,29 @@ public class GcmIntentService extends IntentService {
 					if (intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1) == AudioManager.RINGER_MODE_NORMAL) {
 						// 通常モード
 						ringerMode = true;
-						//						Log.v(TAG, "通常モード");
 					} else {
-						// マナーモードorサイレントモード
 						ringerMode = false;
-						//						Log.v(TAG, "マナーモードorサイレントモード");
+
+					}
+
+					if (intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1) == AudioManager.RINGER_MODE_VIBRATE) {
+						// マナーモード
+						vibrateMode = true;
+
+					} else {
+
+						vibrateMode = false;
+
+					}
+
+					if (intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1) == AudioManager.RINGER_MODE_SILENT) {
+						// サイレントモード
+						silentMode = true;
+
+					} else {
+
+						silentMode = false;
+
 					}
 				}
 			}
@@ -112,7 +182,7 @@ public class GcmIntentService extends IntentService {
 				}
 			}
 		};
-		
+
 		// Broadcast Receiverを登録します。
 		registerReceiver(plugStateChangeReceiver, plugIntentFilter);
 		registerReceiver(ringerModeStateChangeReceiver, ringerModeIntentFilter);
@@ -126,11 +196,8 @@ public class GcmIntentService extends IntentService {
 		unregisterReceiver(ringerModeStateChangeReceiver);
 	}
 
-
 	@Override
 	protected void onHandleIntent(final Intent intent) {
-
-
 
 		extras = intent.getExtras();
 
@@ -139,7 +206,7 @@ public class GcmIntentService extends IntentService {
 		// in your BroadcastReceiver.
 		String messageType = gcm.getMessageType(intent);
 
-//		displayMessage(this, extras.toString());
+		//		displayMessage(this, extras.toString());
 
 		if (!extras.isEmpty()) { // has effect of unparcelling Bundle
 			/*
@@ -167,64 +234,104 @@ public class GcmIntentService extends IntentService {
 				Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
 				// Post notification of received message.
 
-				// ブロードキャストの登録をActivityやService上で行うと、
-				// onDestroy()で解除メソッドを呼び出さないといけない。
-				// 音声のロードを待ってからSoundPoolの開放と
-				// ブロードキャストの解除を行いたいので非同期処理上で完結させます。
-
+				// 音声の読み込み時間の間にIntentServiceが終了してしまうので
+				// 非同期処理で別スレッドに処理を任せます。
 				new AsyncTask<Void, Void, Void>() {
 
 					@Override
 					protected Void doInBackground(Void... params) {
-						Log.v(TAG, "doInBackground()");
+						//						Log.v(TAG, "doInBackground()");
 
-
+						// soundPoolのインスタンスを取得します。
 						soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+						// soundPoolの音声ファイルのロード完了をListenerする匿名クラスを設定します。
 						soundPool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
 
 							@Override
-							public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+							public void onLoadComplete(final SoundPool soundPool, int sampleId, int status) {
 								if (status == 0) {
 
-									sendNotification("公式サイトからのお知らせが" + extras.get("INDEX") + "件あります。", intent);
+									if (notificationPermission) {// 設定で許可された時間帯かの判定です。
 
-									if (ringerMode && !isPlugged) {
-										soundPool.play(se, 1.0F, 1.0F, 0, 0, 1.0F);
-										Log.v(TAG, "通常モード");
-									} else if (!ringerMode) {
-										Log.v(TAG, "マナーモード");
-									} else if (isPlugged) {
-										soundPool.play(se, 0.5F, 0.5F, 0, 0, 1.0F);
-										Log.v(TAG, "イヤホンジャック接続中");
+										// Notificationの通知を実行します。
+										sendNotification("公式サイトからのお知らせが" + extras.get("INDEX") + "件あります。", intent);
+
+										//モードによって通知音、振動の有無の振り分けを行います。
+
+										if (isPlugged) {// イヤホンが接続している場合です。
+										//											Log.v(TAG, "イヤホンが接続されています。");
+											if (ringerMode) {// 通常モード
+												Log.v(TAG, "通常モード");
+												if (checkbox_sound) {
+													soundPool.play(se, 0.5F, 0.5F, 0, 0, 1.0F);
+												}
+												if (checkbox_vibration) {
+													vibrator.vibrate(1500);
+												}
+
+											} else if (vibrateMode) {// マナーモード
+												Log.v(TAG, "マナーモード");
+												if (checkbox_vibration) {
+													vibrator.vibrate(1500);
+												}
+
+											} else if (silentMode) {// サイレントモード
+												Log.v(TAG, "サイレントモード");
+												if (checkbox_sound) {
+													soundPool.play(se, 0.5F, 0.5F, 0, 0, 1.0F);
+												}
+											}
+
+										} else {// イヤホンが接続していない場合です。
+										//											Log.v(TAG, "イヤホンが接続されていません。");
+											if (ringerMode) {// 通常モード
+												Log.v(TAG, "通常モード");
+												if (checkbox_sound) {
+													soundPool.play(se, 0.5F, 0.5F, 0, 0, 1.0F);
+												}
+												if (checkbox_vibration) {
+													vibrator.vibrate(1500);
+												}
+
+											} else if (vibrateMode) {// マナーモード
+												Log.v(TAG, "マナーモード");
+												if (checkbox_vibration) {
+													vibrator.vibrate(1500);
+												}
+
+											} else if (silentMode) {// サイレントモード
+												Log.v(TAG, "サイレントモード");
+												if (checkbox_sound) {
+													soundPool.play(se, 0.5F, 0.5F, 0, 0, 1.0F);
+												}
+											}
+										}
+
 									}
+									// 時間差でsoundPoolのインスタンスを開放します。
+									new Thread(new Runnable() {
 
+										@Override
+										public void run() {
+
+											try {
+												Thread.sleep(30000);
+											} catch (InterruptedException e) {
+											}
+											//											Log.v(TAG, "soundPool.release()");
+
+											soundPool.release();
+
+										}
+									}).start();
 								}
 							}
 						});
 
+						// soundPoolに音声ファイルを読み込みます。
 						se = soundPool.load(GcmIntentService.this, R.raw.notification_sound, 1);
 
 						return null;
-					}
-
-					@Override
-					protected void onPostExecute(Void result) {
-
-						new Thread(new Runnable() {
-
-							@Override
-							public void run() {
-
-								try {
-									Thread.sleep(30000);
-								} catch (InterruptedException e) {
-								}
-								Log.v(TAG, "onPostExecute()");
-
-								soundPool.release();
-
-							}
-						}).start();
 					}
 
 				}.execute(null, null, null);

@@ -42,16 +42,19 @@ public class DialogActivity extends Activity {
 		Intent intent = getIntent();
 		if (intent != null) {
 			Bundle extras = intent.getExtras();
-
+//			Log.v(TAG, "extras ="+extras.toString());
+			
 			Intent update = null;
 			if (extras != null) {
 				update = extras.getParcelable("UPDATE");
+//				Log.v(TAG, "update ="+update.toString());
 			}
 
 			if (update != null) {
 
 				extras = update.getExtras();
-
+//				Log.v(TAG, "extras ="+extras.toString());
+				
 				int index = Integer.parseInt((String) extras.get("INDEX"));
 
 				Log.v(TAG, "index=" + index);
@@ -70,29 +73,29 @@ public class DialogActivity extends Activity {
 			}
 		}
 
-		title.add("1.xxxxx");
-		url.add("http://www.gamecity.ne.jp/nol/");
-		icon.add("f01");
-
-		title.add("2.xxxxx");
-		url.add("http://www.gamecity.ne.jp/nol/");
-		icon.add("f02");
-
-		title.add("3.xxxxx");
-		url.add("http://www.gamecity.ne.jp/nol/");
-		icon.add("f03");
-
-		title.add("4.xxxxx");
-		url.add("http://www.gamecity.ne.jp/nol/");
-		icon.add("f04");
-
-		title.add("5.xxxxx");
-		url.add("http://www.gamecity.ne.jp/nol/");
-		icon.add("f05");
-
-		title.add("6.xxxxx");
-		url.add("http://www.gamecity.ne.jp/nol/");
-		icon.add("f06");
+		//		title.add("1.xxxxx");
+		//		url.add("http://www.gamecity.ne.jp/nol/");
+		//		icon.add("f01");
+		//
+		//		title.add("2.xxxxx");
+		//		url.add("http://www.gamecity.ne.jp/nol/");
+		//		icon.add("f02");
+		//
+		//		title.add("3.xxxxx");
+		//		url.add("http://www.gamecity.ne.jp/nol/");
+		//		icon.add("f03");
+		//
+		//		title.add("4.xxxxx");
+		//		url.add("http://www.gamecity.ne.jp/nol/");
+		//		icon.add("f04");
+		//
+		//		title.add("5.xxxxx");
+		//		url.add("http://www.gamecity.ne.jp/nol/");
+		//		icon.add("f05");
+		//
+		//		title.add("6.xxxxx");
+		//		url.add("http://www.gamecity.ne.jp/nol/");
+		//		icon.add("f06");
 
 		ListView updateListView = (ListView) findViewById(R.id.updateListView);
 

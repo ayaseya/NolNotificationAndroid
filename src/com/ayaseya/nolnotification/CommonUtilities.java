@@ -38,15 +38,15 @@ public final class CommonUtilities {
      * Base URL of the Demo Server (such as http://my_host:8080/gcm-demo)
      * GAEのユニークなURL、末尾の/は削除しておく必要がある
      */
-//    static final String SERVER_URL = "http://1-dot-ayaseya-dev-jp.appspot.com";
-    static final String SERVER_URL = "http://192.168.11.5:8888";
+    static final String SERVER_URL = "http://1-dot-nol-notification.appspot.com";
+//    static final String SERVER_URL = "http://192.168.21.12:8888";
     /**
      * Google API project id registered to use GCM.
      * Google Developers Console
      * https://console.developers.google.com/
      * プロジェクト番号＝SENDER_ID
      */
-    static final String SENDER_ID = "977505068557";
+    static final String SENDER_ID = "295121543090";
 
     /**
      * Tag used on log messages.
