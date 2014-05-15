@@ -254,7 +254,7 @@ public class GcmIntentService extends IntentService {
 									if (notificationPermission) {// 設定で許可された時間帯かの判定です。
 
 										// Notificationの通知を実行します。
-										sendNotification("公式サイトからのお知らせが" + extras.get("INDEX") + "件あります。", intent);
+										sendNotification("拙僧からのお知らせが" + extras.get("INDEX") + "件あるでござるよ。", intent);
 
 										//モードによって通知音、振動の有無の振り分けを行います。
 

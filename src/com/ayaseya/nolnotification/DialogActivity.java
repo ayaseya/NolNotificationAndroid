@@ -4,6 +4,7 @@ import static com.ayaseya.nolnotification.CommonUtilities.*;
 
 import java.util.ArrayList;
 
+import jp.co.imobile.sdkads.android.ImobileSdkAd;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -39,22 +41,36 @@ public class DialogActivity extends Activity {
 		//ダイアログの縦横幅を最大にします。
 		getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
+		// 広告スポットを登録します。
+		ImobileSdkAd.registerSpot(this, "28117", "101494", "225985");
+
+		// 広告を取得します。
+		ImobileSdkAd.start("225985");
+
+		findViewById(R.id.i_mobile).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				ImobileSdkAd.showAd(DialogActivity.this, "225985");
+			}
+		});
+
 		Intent intent = getIntent();
 		if (intent != null) {
 			Bundle extras = intent.getExtras();
-//			Log.v(TAG, "extras ="+extras.toString());
-			
+			//			Log.v(TAG, "extras ="+extras.toString());
+
 			Intent update = null;
 			if (extras != null) {
 				update = extras.getParcelable("UPDATE");
-//				Log.v(TAG, "update ="+update.toString());
+				//				Log.v(TAG, "update ="+update.toString());
 			}
 
 			if (update != null) {
 
 				extras = update.getExtras();
-//				Log.v(TAG, "extras ="+extras.toString());
-				
+				//				Log.v(TAG, "extras ="+extras.toString());
+
 				int index = Integer.parseInt((String) extras.get("INDEX"));
 
 				Log.v(TAG, "index=" + index);
@@ -73,17 +89,17 @@ public class DialogActivity extends Activity {
 			}
 		}
 
-		//		title.add("1.xxxxx");
+		//		title.add("2014/05/15 僧兵三連撃を実装しました");
 		//		url.add("http://www.gamecity.ne.jp/nol/");
 		//		icon.add("f01");
 		//
-		//		title.add("2.xxxxx");
+		//		title.add("2014/05/14 サーバーアップデート内容");
 		//		url.add("http://www.gamecity.ne.jp/nol/");
-		//		icon.add("f02");
+		//		icon.add("f04");
 		//
-		//		title.add("3.xxxxx");
+		//		title.add("2014/05/13 僧兵連撃で思ったよりダメージが与えられない不具合について ");
 		//		url.add("http://www.gamecity.ne.jp/nol/");
-		//		icon.add("f03");
+		//		icon.add("f06");
 		//
 		//		title.add("4.xxxxx");
 		//		url.add("http://www.gamecity.ne.jp/nol/");
@@ -99,8 +115,8 @@ public class DialogActivity extends Activity {
 
 		ListView updateListView = (ListView) findViewById(R.id.updateListView);
 
-//		ArrayAdapter<String> adapter =
-//				new ArrayAdapter<String>(this, R.layout.simple_list_item_layout, title);
+		//		ArrayAdapter<String> adapter =
+		//				new ArrayAdapter<String>(this, R.layout.simple_list_item_layout, title);
 
 		updateListView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -131,7 +147,7 @@ public class DialogActivity extends Activity {
 					R.layout.list_item_layout,
 					R.id.titleView,
 					titles);
-//			Log.v(TAG, "NolAdapter");
+			//			Log.v(TAG, "NolAdapter");
 		}
 
 		@Override
@@ -154,10 +170,17 @@ public class DialogActivity extends Activity {
 				img.setImageResource(R.drawable.f06);
 			}
 
-//			Log.v(TAG, "getView");
+			//			Log.v(TAG, "getView");
 			return row;
 		}
 
+	}
+
+	@Override
+	protected void onDestroy() {
+		// 広告の後処理を行います。
+		ImobileSdkAd.activityDestory();
+		super.onDestroy();
 	}
 
 }

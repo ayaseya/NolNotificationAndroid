@@ -12,11 +12,11 @@
         android:layout_alignParentTop="true" />
 
 <!--     <Button -->
-<!--         android:id="@+id/settingButton" -->
+<!--         android:id="@+id/notification" -->
 <!--         android:layout_width="match_parent" -->
 <!--         android:layout_height="wrap_content" -->
 <!--         android:layout_alignParentBottom="true" -->
 <!--         android:layout_alignParentLeft="true" -->
-<!--         android:text="@string/action_settings" /> -->
+<!--         android:text="test" /> -->
 
 </RelativeLayout>

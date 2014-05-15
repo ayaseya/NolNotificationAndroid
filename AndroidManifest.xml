@@ -7,7 +7,9 @@
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
-
+    
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
     <!-- GCM connects to Google Services. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -98,6 +100,8 @@
             android:theme="@style/Theme.SemiTransparent" >
         </activity>
         <activity android:name="SettingActivity"></activity>
+        
+        <meta-data android:name="i-mobile_DebugLogging" android:value="true" />
     </application>
 
 </manifest>
