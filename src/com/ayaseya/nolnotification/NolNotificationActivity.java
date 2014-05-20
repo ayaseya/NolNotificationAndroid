@@ -424,6 +424,11 @@ public class NolNotificationActivity extends Activity {
 			startActivity(intent);
 			
 		}
+		
+//		else if(id==R.id.action_notification){
+//			sendNotification("拙僧からのお知らせが3件あるでござるよ。");
+//		}
+
 		return super.onOptionsItemSelected(item);
 		
 		

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ayaseya.nolnotification"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="2"
+    android:versionName="1.0.1" >
 
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
-    
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    
+
     <!-- GCM connects to Google Services. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -34,7 +34,7 @@
 
     <!-- This app has permission to register and receive data message. -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -99,9 +99,16 @@
             android:launchMode="singleInstance"
             android:theme="@style/Theme.SemiTransparent" >
         </activity>
-        <activity android:name="SettingActivity"></activity>
-        
-        <meta-data android:name="i-mobile_DebugLogging" android:value="true" />
+        <activity android:name="SettingActivity" >
+        </activity>
+
+        <!-- i-mobile広告用 -->
+        <meta-data
+            android:name="i-mobile_DebugLogging"
+            android:value="true" />
+        <meta-data
+            android:name="i-mobile_Publisher_ID"
+            android:value="28117" />
     </application>
 
 </manifest>

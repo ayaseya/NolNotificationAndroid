@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -46,14 +45,6 @@ public class DialogActivity extends Activity {
 
 		// 広告を取得します。
 		ImobileSdkAd.start("225985");
-
-		findViewById(R.id.i_mobile).setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				ImobileSdkAd.showAd(DialogActivity.this, "225985");
-			}
-		});
 
 		Intent intent = getIntent();
 		if (intent != null) {
@@ -88,6 +79,10 @@ public class DialogActivity extends Activity {
 				}
 			}
 		}
+
+		title.add("おすすめアプリでござるよ（PR）");
+		url.add("i-mobile");
+		icon.add("f01");
 
 		//		title.add("2014/05/15 僧兵三連撃を実装しました");
 		//		url.add("http://www.gamecity.ne.jp/nol/");
@@ -124,9 +119,14 @@ public class DialogActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Log.v(TAG, "position=" + position);
 
-				Uri uri = Uri.parse(url.get(position));
-				Intent browser = new Intent(Intent.ACTION_VIEW, uri);
-				startActivity(browser);
+				if (url.get(position).equals("i-mobile")) {
+					ImobileSdkAd.showAd(DialogActivity.this, "225985");
+				} else {
+
+					Uri uri = Uri.parse(url.get(position));
+					Intent browser = new Intent(Intent.ACTION_VIEW, uri);
+					startActivity(browser);
+				}
 			}
 		});
 

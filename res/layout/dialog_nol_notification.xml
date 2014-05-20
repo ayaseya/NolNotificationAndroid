@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/triangle"
         android:background="@drawable/balloon" >
-
     </ListView>
 
     <ImageView
@@ -22,29 +21,22 @@
         android:layout_alignParentLeft="true"
         android:src="@drawable/triangle" />
 
-    <Button
-        android:id="@+id/i_mobile"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <jp.co.imobile.android.AdView
+        android:id="@+id/i_mobile_banner"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignRight="@+id/icon"
-        android:background="@drawable/i_mobile"
-        android:paddingBottom="4dp"
-        android:paddingLeft="24dp"
-        android:paddingRight="24dp"
-        android:paddingTop="4dp"
-        android:text="おすすめアプリ"
-        android:textColor="#FFFFFF" />
+        asid="227558"
+        mid="101494" >
+    </jp.co.imobile.android.AdView>
 
     <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/i_mobile"
+        android:layout_above="@+id/i_mobile_banner"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="-1dp"
         android:src="@drawable/souhei_icon" />
 
 </RelativeLayout>
